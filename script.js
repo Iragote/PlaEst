@@ -6,40 +6,26 @@ const dadosEstudos = {
     legislação: ["LDB", "ECA", "BNCC", "Didática e Avaliação", "Constitucional", "Penal", "Processo Penal", "Administrativo"]
 };
 
-// --- LOGICA DE MATÉRIAS ---
-
+// Funções de Interface
 function mostrarAssuntos(materia) {
     const container = document.getElementById('lista-assuntos');
     const progressoDiv = document.getElementById('progresso-geral');
-    
     if (!container || !progressoDiv) return;
 
     progressoDiv.style.display = 'block';
     container.innerHTML = `<h2>Estudando: ${materia.toUpperCase()}</h2>`;
 
-    const lista = dadosEstudos[materia];
-
-    lista.forEach(assunto => {
-        const idAssunto = `${materia}-${assunto.replace(/\s+/g, '')}`;
-        const ultimaRevisao = localStorage.getItem(`data-${idAssunto}`);
-        
-        let infoData = 'Nunca revisado';
-        if (ultimaRevisao) {
-            infoData = `Última marcação: ${new Date(ultimaRevisao).toLocaleDateString()}`;
-        }
-
+    dadosEstudos[materia].forEach(assunto => {
         const divAssunto = document.createElement('div');
-        divAssunto.className = `item-assunto`;
+        divAssunto.className = 'item-assunto';
         divAssunto.innerHTML = `
             <h3>${assunto}</h3>
-            <span class="data-revisao" style="font-size: 0.7rem; opacity: 0.6;">${infoData}</span>
             <div class="quadrados-container">
                 ${gerarQuadrados(materia, assunto)}
             </div>
         `;
         container.appendChild(divAssunto);
     });
-
     atualizarProgresso();
 }
 
@@ -48,101 +34,64 @@ function gerarQuadrados(materia, assunto) {
     for (let i = 1; i <= 10; i++) {
         const idUnico = `${materia}-${assunto.replace(/\s+/g, '')}-${i}`;
         const check = localStorage.getItem(idUnico) === 'true' ? 'check' : '';
-        html += `<div class="quadrado ${check}" onclick="toggleCheck('${idUnico}', this, '${materia}', '${assunto}')"></div>`;
+        html += `<div class="quadrado ${check}" onclick="toggleCheck('${idUnico}', this)"></div>`;
     }
     return html;
 }
 
-function toggleCheck(id, elemento, materia, assunto) {
+function toggleCheck(id, elemento) {
     const estaMarcado = elemento.classList.toggle('check');
     localStorage.setItem(id, estaMarcado);
-    
-    const idAssunto = `${materia}-${assunto.replace(/\s+/g, '')}`;
-    localStorage.setItem(`data-${idAssunto}`, new Date().toISOString());
-    
     atualizarProgresso();
 }
 
 function atualizarProgresso() {
     const quadrados = document.querySelectorAll('.quadrado');
     const marcados = document.querySelectorAll('.quadrado.check');
-    const barra = document.getElementById('barra-preenchimento');
-    const texto = document.getElementById('status-porcentagem');
+    const porcentagem = quadrados.length > 0 ? Math.round((marcados.length / quadrados.length) * 100) : 0;
     
-    if (quadrados.length > 0 && barra) {
-        const porcentagem = Math.round((marcados.length / quadrados.length) * 100);
-        barra.style.width = porcentagem + '%';
-        texto.innerText = `${porcentagem}% concluído`;
-    }
+    document.getElementById('barra-preenchimento').style.width = porcentagem + '%';
+    document.getElementById('status-porcentagem').innerText = `${porcentagem}% concluído`;
 }
 
-// --- ROTINA SEMANAL ---
-
+// Rotina Semanal
 function salvarRotina(diaId) {
-    const texto = document.getElementById(diaId).value;
-    localStorage.setItem(`rotina-${diaId}`, texto);
+    localStorage.setItem(`rotina-${diaId}`, document.getElementById(diaId).value);
 }
 
-function carregarRotina() {
-    const dias = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
-    dias.forEach(dia => {
+function carregarDados() {
+    ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'].forEach(dia => {
         const salvo = localStorage.getItem(`rotina-${dia}`);
-        const campo = document.getElementById(dia);
-        if (salvo && campo) campo.value = salvo;
+        if (salvo) document.getElementById(dia).value = salvo;
     });
 }
 
-// --- FUNDO MATRIX MATEMÁTICO ---
-
+// Animação de Fundo (Matrix)
 const canvas = document.getElementById('canvas-fundo');
 const ctx = canvas.getContext('2d');
+let colunas, gotas;
 
 function ajustarCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    colunas = canvas.width / 16;
+    gotas = Array(Math.floor(colunas)).fill(1);
 }
-ajustarCanvas();
-
-const letras = "0123456789πΣ∞√∫∆λ";
-const tamanhoFonte = 16;
-let colunas = canvas.width / tamanhoFonte;
-let gotas = [];
-
-function inicializarGotas() {
-    colunas = canvas.width / tamanhoFonte;
-    for (let i = 0; i < colunas; i++) {
-        gotas[i] = 1;
-    }
-}
-inicializarGotas();
 
 function desenharMatrix() {
     ctx.fillStyle = "rgba(18, 18, 18, 0.05)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     ctx.fillStyle = "#00ffff";
-    ctx.font = tamanhoFonte + "px monospace";
-
-    for (let i = 0; i < gotas.length; i++) {
-        const texto = letras.charAt(Math.floor(Math.random() * letras.length));
-        ctx.fillText(texto, i * tamanhoFonte, gotas[i] * tamanhoFonte);
-
-        if (gotas[i] * tamanhoFonte > canvas.height && Math.random() > 0.975) {
-            gotas[i] = 0;
-        }
+    ctx.font = "16px monospace";
+    gotas.forEach((y, i) => {
+        const texto = "0123456789πΣ∞√∫"[Math.floor(Math.random() * 15)];
+        ctx.fillText(texto, i * 16, y * 16);
+        if (y * 16 > canvas.height && Math.random() > 0.975) gotas[i] = 0;
         gotas[i]++;
-    }
+    });
 }
 
+window.addEventListener('resize', ajustarCanvas);
+ajustarCanvas();
 setInterval(desenharMatrix, 50);
-
-// --- EVENTOS DE INICIALIZAÇÃO ---
-
-window.addEventListener('resize', () => {
-    ajustarCanvas();
-    inicializarGotas();
-});
-
-window.onload = () => {
-    carregarRotina();
-};
+window.onload = carregarDados;
