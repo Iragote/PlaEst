@@ -1,120 +1,97 @@
-body {/* --- CONFIGURAÇÃO GLOBAL --- */
-body {
-    background-color: #121212;
-    background-image: 
-        linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 30px 30px;
-    color: #00ffff;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    padding: 20px;
-    margin: 0;
-    min-height: 100vh;
-    overflow-x: hidden;
-    scroll-behavior: smooth;
+const dadosEstudos = {
+    portugues: ["Gramática", "Interpretação de Texto", "Sintaxe", "Pontuação", "Morfologia"],
+    matematica: ["Cálculo", "Geometria Plana", "Probabilidade e Estatística", "Álgebra", "Geometria Espacial", "Analise combinatoria", "Logica Matematica", "Matematica Basica"],
+    fisica: ["Cinemática", "Dinâmica", "Estatica", "Hidrostática", "Termodinamica", "Ondulatoria e Otica", "Eletromagnetismo", "Relatividade", "Fisica Quantica", "Fisica Nuclear e de Particulas", "Fisica do Estado Solido"],
+    quimica: ["Estequiometria", "Soluções", "Química Orgânica", "Termoquímica", "Equilíbrio Químico"],
+    legislação: ["LDB", "ECA", "BNCC", "Didática e Avaliação", "Constitucional", "Penal", "Processo Penal", "Administrativo"]
+};
+
+// Funções de Interface
+function mostrarAssuntos(materia) {
+    const container = document.getElementById('lista-assuntos');
+    const progressoDiv = document.getElementById('progresso-geral');
+    if (!container || !progressoDiv) return;
+
+    progressoDiv.style.display = 'block';
+    container.innerHTML = `<h2>Estudando: ${materia.toUpperCase()}</h2>`;
+
+    dadosEstudos[materia].forEach(assunto => {
+        const divAssunto = document.createElement('div');
+        divAssunto.className = 'item-assunto';
+        divAssunto.innerHTML = `
+            <h3>${assunto}</h3>
+            <div class="quadrados-container">
+                ${gerarQuadrados(materia, assunto)}
+            </div>
+        `;
+        container.appendChild(divAssunto);
+    });
+    atualizarProgresso();
 }
 
-/* Brilho de Topo Neon */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 50% -20%, rgba(57, 255, 20, 0.15), transparent 70%);
-    pointer-events: none;
-    z-index: -1;
+function gerarQuadrados(materia, assunto) {
+    let html = '';
+    for (let i = 1; i <= 10; i++) {
+        const idUnico = `${materia}-${assunto.replace(/\s+/g, '')}-${i}`;
+        const check = localStorage.getItem(idUnico) === 'true' ? 'check' : '';
+        html += `<div class="quadrado ${check}" onclick="toggleCheck('${idUnico}', this)"></div>`;
+    }
+    return html;
 }
 
-/* --- ELEMENTOS DE INTERFACE --- */
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1; /* Garante que o conteúdo fique acima do Canvas */
+function toggleCheck(id, elemento) {
+    const estaMarcado = elemento.classList.toggle('check');
+    localStorage.setItem(id, estaMarcado);
+    atualizarProgresso();
 }
 
-h1 {
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
-    margin-bottom: 40px;
-    text-align: center;
+function atualizarProgresso() {
+    const quadrados = document.querySelectorAll('.quadrado');
+    const marcados = document.querySelectorAll('.quadrado.check');
+    const porcentagem = quadrados.length > 0 ? Math.round((marcados.length / quadrados.length) * 100) : 0;
+    
+    document.getElementById('barra-preenchimento').style.width = porcentagem + '%';
+    document.getElementById('status-porcentagem').innerText = `${porcentagem}% concluído`;
 }
 
-/* Botões Estilo Sci-Fi */
-button {
-    background: transparent;
-    border: 2px solid #00ffff;
-    color: #00ffff;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    padding: 12px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
-    transition: all 0.3s ease;
+// Rotina Semanal
+function salvarRotina(diaId) {
+    localStorage.setItem(`rotina-${diaId}`, document.getElementById(diaId).value);
 }
 
-button:hover {
-    background: #00ffff;
-    color: #121212;
-    box-shadow: 0 0 20px #00ffff;
-    transform: scale(1.05);
+function carregarDados() {
+    ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'].forEach(dia => {
+        const salvo = localStorage.getItem(`rotina-${dia}`);
+        if (salvo) document.getElementById(dia).value = salvo;
+    });
 }
 
-/* --- GRADE SEMANAL (GLASSMORPHISM) --- */
-.dia-box {
-    background: rgba(30, 30, 30, 0.8);
-    backdrop-filter: blur(5px);
-    border: 1px solid #00ffff;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
+// Animação de Fundo (Matrix)
+const canvas = document.getElementById('canvas-fundo');
+const ctx = canvas.getContext('2d');
+let colunas, gotas;
+
+function ajustarCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    colunas = canvas.width / 16;
+    gotas = Array(Math.floor(colunas)).fill(1);
 }
 
-.dia-box:hover {
-    transform: translateY(-5px);
-    border-color: #39ff14;
-    box-shadow: 0 0 15px rgba(57, 255, 20, 0.3);
+function desenharMatrix() {
+    ctx.fillStyle = "rgba(18, 18, 18, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#00ffff";
+    ctx.font = "16px monospace";
+    gotas.forEach((y, i) => {
+        const texto = "0123456789πΣ∞√∫"[Math.floor(Math.random() * 15)];
+        ctx.fillText(texto, i * 16, y * 16);
+        if (y * 16 > canvas.height && Math.random() > 0.975) gotas[i] = 0;
+        gotas[i]++;
+    });
 }
 
-.dia-box span {
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #00ffff;
-    text-shadow: 0 0 5px #00ffff;
-}
-
-/* --- BARRA DE PROGRESSO NEON --- */
-#barra-preenchimento {
-    background: #39ff14 !important;
-    box-shadow: 0 0 15px #39ff14, 0 0 5px #fff;
-    height: 100%;
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#status-porcentagem {
-    color: #39ff14 !important;
-    font-weight: bold;
-    text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
-}
-
-/* --- CANVAS DE FUNDO --- */
-#canvas-fundo {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -2; 
-    opacity: 0.12; 
-    pointer-events: none;
-}
+window.addEventListener('resize', ajustarCanvas);
+ajustarCanvas();
+setInterval(desenharMatrix, 50);
+window.onload = carregarDados;
