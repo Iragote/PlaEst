@@ -6,7 +6,7 @@ const dadosEstudos = {
     legislação: ["LDB", "ECA", "BNCC", "Didática e Avaliação", "Constitucional", "Penal", "Processo Penal", "Administrativo"]
 };
 
-// Funções de Interface
+// --- LOGICA DE MATÉRIAS ---
 function mostrarAssuntos(materia) {
     const container = document.getElementById('lista-assuntos');
     const progressoDiv = document.getElementById('progresso-geral');
@@ -16,10 +16,19 @@ function mostrarAssuntos(materia) {
     container.innerHTML = `<h2>Estudando: ${materia.toUpperCase()}</h2>`;
 
     dadosEstudos[materia].forEach(assunto => {
+        const idAssunto = `${materia}-${assunto.replace(/\s+/g, '')}`;
+        const ultimaRevisao = localStorage.getItem(`data-${idAssunto}`);
+        
+        let infoData = 'Nunca revisado';
+        if (ultimaRevisao) {
+            infoData = `Última marcação: ${new Date(ultimaRevisao).toLocaleDateString()}`;
+        }
+
         const divAssunto = document.createElement('div');
         divAssunto.className = 'item-assunto';
         divAssunto.innerHTML = `
             <h3>${assunto}</h3>
+            <span class="data-revisao" style="font-size: 0.7rem; opacity: 0.6; display: block; margin-bottom: 10px;">${infoData}</span>
             <div class="quadrados-container">
                 ${gerarQuadrados(materia, assunto)}
             </div>
@@ -34,14 +43,23 @@ function gerarQuadrados(materia, assunto) {
     for (let i = 1; i <= 10; i++) {
         const idUnico = `${materia}-${assunto.replace(/\s+/g, '')}-${i}`;
         const check = localStorage.getItem(idUnico) === 'true' ? 'check' : '';
-        html += `<div class="quadrado ${check}" onclick="toggleCheck('${idUnico}', this)"></div>`;
+        html += `<div class="quadrado ${check}" onclick="toggleCheck('${idUnico}', this, '${materia}', '${assunto}')"></div>`;
     }
     return html;
 }
 
-function toggleCheck(id, elemento) {
+function toggleCheck(id, elemento, materia, assunto) {
     const estaMarcado = elemento.classList.toggle('check');
     localStorage.setItem(id, estaMarcado);
+    
+    // Atualiza a data da última revisão ao clicar em qualquer quadrado
+    const idAssunto = `${materia}-${assunto.replace(/\s+/g, '')}`;
+    localStorage.setItem(`data-${idAssunto}`, new Date().toISOString());
+    
+    // Atualiza o texto da data na tela sem precisar recarregar
+    const spanData = elemento.closest('.item-assunto').querySelector('.data-revisao');
+    spanData.innerText = `Última marcação: ${new Date().toLocaleDateString()}`;
+    
     atualizarProgresso();
 }
 
@@ -54,7 +72,7 @@ function atualizarProgresso() {
     document.getElementById('status-porcentagem').innerText = `${porcentagem}% concluído`;
 }
 
-// Rotina Semanal
+// --- ROTINA SEMANAL ---
 function salvarRotina(diaId) {
     localStorage.setItem(`rotina-${diaId}`, document.getElementById(diaId).value);
 }
@@ -62,20 +80,23 @@ function salvarRotina(diaId) {
 function carregarDados() {
     ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'].forEach(dia => {
         const salvo = localStorage.getItem(`rotina-${dia}`);
-        if (salvo) document.getElementById(dia).value = salvo;
+        if (salvo) {
+            const campo = document.getElementById(dia);
+            if (campo) campo.value = salvo;
+        }
     });
 }
 
-// Animação de Fundo (Matrix)
+// --- FUNDO MATRIX MATEMÁTICO ---
 const canvas = document.getElementById('canvas-fundo');
 const ctx = canvas.getContext('2d');
-let colunas, gotas;
+let gotas = [];
 
 function ajustarCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    colunas = canvas.width / 16;
-    gotas = Array(Math.floor(colunas)).fill(1);
+    const colunas = Math.floor(canvas.width / 16);
+    gotas = Array(colunas).fill(1);
 }
 
 function desenharMatrix() {
@@ -83,15 +104,18 @@ function desenharMatrix() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#00ffff";
     ctx.font = "16px monospace";
+
     gotas.forEach((y, i) => {
-        const texto = "0123456789πΣ∞√∫"[Math.floor(Math.random() * 15)];
+        const letras = "0123456789πΣ∞√∫∆λ";
+        const texto = letras[Math.floor(Math.random() * letras.length)];
         ctx.fillText(texto, i * 16, y * 16);
+
         if (y * 16 > canvas.height && Math.random() > 0.975) gotas[i] = 0;
         gotas[i]++;
     });
 }
 
-window.addEventListener('resize', ajustarCanvas);
 ajustarCanvas();
 setInterval(desenharMatrix, 50);
+window.addEventListener('resize', ajustarCanvas);
 window.onload = carregarDados;
