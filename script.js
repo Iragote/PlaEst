@@ -6,6 +6,8 @@ const dadosEstudos = {
     legislação: ["LDB", "ECA", "BNCC", "Didática e Avaliação", "Constitucional", "Penal", "Processo Penal", "Administrativo"]
 };
 
+// --- LOGICA DE MATÉRIAS ---
+
 function mostrarAssuntos(materia) {
     const container = document.getElementById('lista-assuntos');
     const progressoDiv = document.getElementById('progresso-geral');
@@ -67,14 +69,15 @@ function atualizarProgresso() {
     const barra = document.getElementById('barra-preenchimento');
     const texto = document.getElementById('status-porcentagem');
     
-    if (quadrados.length > 0) {
+    if (quadrados.length > 0 && barra) {
         const porcentagem = Math.round((marcados.length / quadrados.length) * 100);
         barra.style.width = porcentagem + '%';
         texto.innerText = `${porcentagem}% concluído`;
     }
 }
 
-// Funções da Rotina (Textarea)
+// --- ROTINA SEMANAL ---
+
 function salvarRotina(diaId) {
     const texto = document.getElementById(diaId).value;
     localStorage.setItem(`rotina-${diaId}`, texto);
@@ -89,28 +92,35 @@ function carregarRotina() {
     });
 }
 
+// --- FUNDO MATRIX MATEMÁTICO ---
+
 const canvas = document.getElementById('canvas-fundo');
 const ctx = canvas.getContext('2d');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function ajustarCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+ajustarCanvas();
 
-// Números e símbolos matemáticos
 const letras = "0123456789πΣ∞√∫∆λ";
 const tamanhoFonte = 16;
-const colunas = canvas.width / tamanhoFonte;
+let colunas = canvas.width / tamanhoFonte;
+let gotas = [];
 
-const gotas = [];
-for (let i = 0; i < colunas; i++) {
-    gotas[i] = 1;
+function inicializarGotas() {
+    colunas = canvas.width / tamanhoFonte;
+    for (let i = 0; i < colunas; i++) {
+        gotas[i] = 1;
+    }
 }
+inicializarGotas();
 
 function desenharMatrix() {
-    // Fundo semitransparente para criar o rastro
     ctx.fillStyle = "rgba(18, 18, 18, 0.05)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "#00ffff"; // Cor ciano para os números
+    ctx.fillStyle = "#00ffff";
     ctx.font = tamanhoFonte + "px monospace";
 
     for (let i = 0; i < gotas.length; i++) {
@@ -124,11 +134,15 @@ function desenharMatrix() {
     }
 }
 
-// Atualiza a animação
 setInterval(desenharMatrix, 50);
 
-// Ajusta o tamanho se você redimensionar a janela
+// --- EVENTOS DE INICIALIZAÇÃO ---
+
 window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    ajustarCanvas();
+    inicializarGotas();
 });
+
+window.onload = () => {
+    carregarRotina();
+};
