@@ -40,7 +40,7 @@ function mostrarAssuntos(materia) {
 
 function gerarQuadrados(materia, assunto) {
     let html = '';
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 15; i++) {
         const idUnico = `${materia}-${assunto.replace(/\s+/g, '')}-${i}`;
         const check = localStorage.getItem(idUnico) === 'true' ? 'check' : '';
         html += `<div class="quadrado ${check}" onclick="toggleCheck('${idUnico}', this, '${materia}', '${assunto}')"></div>`;
@@ -119,3 +119,4 @@ ajustarCanvas();
 setInterval(desenharMatrix, 50);
 window.addEventListener('resize', ajustarCanvas);
 window.onload = carregarDados;
+
