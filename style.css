@@ -1,153 +1,40 @@
-cbody {
-    background-color: #121212;
-    margin: 0;
-    padding: 20px;
-    color: #00ffff;
-    font-family: 'Segoe UI', sans-serif;
-    min-height: 100vh;
-}
+/* 1. RESET E FUNDO */ 
+body { background-color: #121212; margin: 0; padding: 20px; color: #00ffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; overflow-x: hidden; } 
 
-/* Fixar o fundo de números atrás de tudo */
-#canvas-fundo {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    opacity: 0.15;
-    pointer-events: none;
-}
+/* 2. O CANVAS (FUNDAMENTAL PARA O GITHUB) */ 
+#canvas-fundo { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.15; pointer-events: none; } 
 
-.container {
-    max-width: 900px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-}
+/* 3. CONTAINER PRINCIPAL */ 
+.container { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; } 
 
-h1, h2 {
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-}
+/* 4. ESCALA SEMANAL (GLASSMORPHISM) */ 
+.grid-semana { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin: 20px 0; } 
 
-/* Grid da Rotina */
-.grid-semana {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: 10px;
-    margin: 20px 0;
-}
+.dia-box { background: rgba(30, 30, 30, 0.7); border: 1px solid #00ffff; border-radius: 8px; padding: 10px; backdrop-filter: blur(4px); transition: 0.3s; } 
 
-.dia-box {
-    background: rgba(30, 30, 30, 0.8);
-    backdrop-filter: blur(5px);
-    border: 1px solid #00ffff;
-    border-radius: 8px;
-    padding: 10px;
-    transition: 0.3s;
-}
+.dia-box:hover { border-color: #39ff14; transform: translateY(-3px); } 
 
-.dia-box:hover {
-    border-color: #39ff14;
-    transform: translateY(-3px);
-}
+.dia-box span { font-size: 0.75rem; font-weight: bold; display: block; margin-bottom: 5px; text-align: center; } 
 
-.dia-box span {
-    display: block;
-    text-align: center;
-    font-weight: bold;
-    font-size: 0.8rem;
-    margin-bottom: 5px;
-}
+textarea { width: 100%; height: 60px; background: transparent; border: none; color: #fff; resize: none; outline: none; font-size: 0.85rem; } 
 
-textarea {
-    width: 100%;
-    height: 60px;
-    background: transparent;
-    border: none;
-    color: #fff;
-    resize: none;
-    outline: none;
-    text-align: center;
-}
+/* 5. BOTÕES NEON */ 
+.materias-menu { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; } 
 
-/* Botões de Matérias */
-.materias-menu {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
+button { background: transparent; color: #00ffff; border: 1px solid #00ffff; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; } 
 
-button {
-    background: transparent;
-    border: 2px solid #00ffff;
-    color: #00ffff;
-    padding: 10px 18px;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
+button:hover { background: #00ffff; color: #121212; box-shadow: 0 0 15px #00ffff; } 
 
-button:hover {
-    background: #00ffff;
-    color: #121212;
-    box-shadow: 0 0 15px #00ffff;
-}
+/* 6. BARRA DE PROGRESSO VERDE NEON */ 
+#barra-preenchimento { transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: #39ff14; box-shadow: 0 0 15px #39ff14; height: 100%; } 
 
-/* Barra de Progresso Verde Neon */
-.barra-fundo {
-    width: 100%;
-    background: #333;
-    height: 14px;
-    border-radius: 7px;
-    overflow: hidden;
-}
+.barra-fundo { width: 100%; background: #333; height: 14px; border-radius: 7px; overflow: hidden; }
 
-#barra-preenchimento {
-    width: 0%;
-    height: 100%;
-    background: #39ff14;
-    box-shadow: 0 0 15px #39ff14;
-    transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* 7. ITENS DA LISTA */ 
+.item-assunto { background: rgba(38, 38, 38, 0.8); margin-bottom: 15px; padding: 20px; border-radius: 10px; border-left: 5px solid #00ffff; box-shadow: 0 4px 15px rgba(0,0,0,0.3); } 
 
-#status-porcentagem {
-    color: #39ff14;
-    text-align: right;
-    font-weight: bold;
-    margin-top: 5px;
-}
+.quadrados-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
-/* Lista de Assuntos */
-.item-assunto {
-    background: rgba(40, 40, 40, 0.9);
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 15px;
-    border-left: 5px solid #00ffff;
-}
+.quadrado { width: 28px; height: 28px; border: 1px solid #444; border-radius: 4px; cursor: pointer; transition: 0.2s; } 
 
-.quadrados-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.quadrado {
-    width: 25px;
-    height: 25px;
-    border: 1px solid #555;
-    cursor: pointer;
-    border-radius: 3px;
-}
-
-.quadrado.check {
-    background: #00ffff;
-    box-shadow: 0 0 10px #00ffff;
-}
+.quadrado.check { background: #00ffff; box-shadow: 0 0 10px #00ffff; border-color: #fff; }
