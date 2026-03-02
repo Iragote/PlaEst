@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Controle de Estudos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+    <h1>📊 Controle & Rotina de Estudos</h1>
+    
+    <div class="rotina-semanal">
+        <h2>🗓️ Minha Escala Semanal</h2>
+        <div class="grid-semana">
+            <div class="dia-box"><span>SEG</span><textarea id="seg" oninput="salvarRotina('seg')"></textarea></div>
+            <div class="dia-box"><span>TER</span><textarea id="ter" oninput="salvarRotina('ter')"></textarea></div>
+            <div class="dia-box"><span>QUA</span><textarea id="qua" oninput="salvarRotina('qua')"></textarea></div>
+            <div class="dia-box"><span>QUI</span><textarea id="qui" oninput="salvarRotina('qui')"></textarea></div>
+            <div class="dia-box"><span>SEX</span><textarea id="sex" oninput="salvarRotina('sex')"></textarea></div>
+            <div class="dia-box"><span>SAB</span><textarea id="sab" oninput="salvarRotina('sab')"></textarea></div>
+            <div class="dia-box"><span>DOM</span><textarea id="dom" oninput="salvarRotina('dom')"></textarea></div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="materias-menu">
+        <button onclick="mostrarAssuntos('portugues')">Português</button>
+        <button onclick="mostrarAssuntos('matematica')">Matemática</button>
+        <button onclick="mostrarAssuntos('fisica')">Física</button>
+        <button onclick="mostrarAssuntos('quimica')">Química</button>
+        <button onclick="mostrarAssuntos('legislação')">Legislação</button>
+    </div>
+
+    <div id="lista-assuntos" class="lista-assuntos"></div>
+</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
