@@ -1,201 +1,134 @@
-body {
-    background-color: #121212;
-    /* Cria uma grade sutil de fundo */
-    background-image: 
-        linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 30px 30px; /* Tamanho dos quadrados da grade */
+const dadosEstudos = {
+    portugues: ["Gramática", "Interpretação de Texto", "Sintaxe", "Pontuação", "Morfologia"],
+    matematica: ["Cálculo", "Geometria Plana", "Probabilidade e Estatística", "Álgebra", "Geometria Espacial", "Analise combinatoria", "Logica Matematica", "Matematica Basica"],
+    fisica: ["Cinemática", "Dinâmica", "Estatica", "Hidrostática", "Termodinamica", "Ondulatoria e Otica", "Eletromagnetismo", "Relatividade", "Fisica Quantica", "Fisica Nuclear e de Particulas", "Fisica do Estado Solido"],
+    quimica: ["Estequiometria", "Soluções", "Química Orgânica", "Termoquímica", "Equilíbrio Químico"],
+    legislação: ["LDB", "ECA", "BNCC", "Didática e Avaliação", "Constitucional", "Penal", "Processo Penal", "Administrativo"]
+};
+
+function mostrarAssuntos(materia) {
+    const container = document.getElementById('lista-assuntos');
+    const progressoDiv = document.getElementById('progresso-geral');
     
-    color: #00ffff;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    padding: 20px;
-    margin: 0;
-    min-height: 100vh;
+    if (!container || !progressoDiv) return;
+
+    progressoDiv.style.display = 'block';
+    container.innerHTML = `<h2>Estudando: ${materia.toUpperCase()}</h2>`;
+
+    const lista = dadosEstudos[materia];
+
+    lista.forEach(assunto => {
+        const idAssunto = `${materia}-${assunto.replace(/\s+/g, '')}`;
+        const ultimaRevisao = localStorage.getItem(`data-${idAssunto}`);
+        
+        let infoData = 'Nunca revisado';
+        if (ultimaRevisao) {
+            infoData = `Última marcação: ${new Date(ultimaRevisao).toLocaleDateString()}`;
+        }
+
+        const divAssunto = document.createElement('div');
+        divAssunto.className = `item-assunto`;
+        divAssunto.innerHTML = `
+            <h3>${assunto}</h3>
+            <span class="data-revisao" style="font-size: 0.7rem; opacity: 0.6;">${infoData}</span>
+            <div class="quadrados-container">
+                ${gerarQuadrados(materia, assunto)}
+            </div>
+        `;
+        container.appendChild(divAssunto);
+    });
+
+    atualizarProgresso();
 }
 
-/* Adiciona um efeito de "brilho vindo do topo" */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 50% -20%, rgba(57, 255, 20, 0.15), transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-}
-.container {
-    max-width: 800px;
-    margin: 0 auto;
+function gerarQuadrados(materia, assunto) {
+    let html = '';
+    for (let i = 1; i <= 10; i++) {
+        const idUnico = `${materia}-${assunto.replace(/\s+/g, '')}-${i}`;
+        const check = localStorage.getItem(idUnico) === 'true' ? 'check' : '';
+        html += `<div class="quadrado ${check}" onclick="toggleCheck('${idUnico}', this, '${materia}', '${assunto}')"></div>`;
+    }
+    return html;
 }
 
-h1, h2, h3 {
-    text-align: center;
-    color: #00ffff;
-    text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+function toggleCheck(id, elemento, materia, assunto) {
+    const estaMarcado = elemento.classList.toggle('check');
+    localStorage.setItem(id, estaMarcado);
+    
+    const idAssunto = `${materia}-${assunto.replace(/\s+/g, '')}`;
+    localStorage.setItem(`data-${idAssunto}`, new Date().toISOString());
+    
+    atualizarProgresso();
 }
 
-.materias-menu, .input-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 20px;
+function atualizarProgresso() {
+    const quadrados = document.querySelectorAll('.quadrado');
+    const marcados = document.querySelectorAll('.quadrado.check');
+    const barra = document.getElementById('barra-preenchimento');
+    const texto = document.getElementById('status-porcentagem');
+    
+    if (quadrados.length > 0) {
+        const porcentagem = Math.round((marcados.length / quadrados.length) * 100);
+        barra.style.width = porcentagem + '%';
+        texto.innerText = `${porcentagem}% concluído`;
+    }
 }
 
-button {
-    padding: 10px 15px;
-    background-color: #333;
-    color: #00ffff;
-    border: 1px solid #00ffff;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s ease;
+// Funções da Rotina (Textarea)
+function salvarRotina(diaId) {
+    const texto = document.getElementById(diaId).value;
+    localStorage.setItem(`rotina-${diaId}`, texto);
 }
 
-button:hover {
-    background-color: #00ffff;
-    color: #1e1e1e;
+function carregarRotina() {
+    const dias = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
+    dias.forEach(dia => {
+        const salvo = localStorage.getItem(`rotina-${dia}`);
+        const campo = document.getElementById(dia);
+        if (salvo && campo) campo.value = salvo;
+    });
 }
 
-input[type="text"] {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #00ffff;
-    background: #2a2a2a;
-    color: #fff;
-    width: 250px;
+const canvas = document.getElementById('canvas-fundo');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// Números e símbolos matemáticos
+const letras = "0123456789πΣ∞√∫∆λ";
+const tamanhoFonte = 16;
+const colunas = canvas.width / tamanhoFonte;
+
+const gotas = [];
+for (let i = 0; i < colunas; i++) {
+    gotas[i] = 1;
 }
 
-.item-assunto {
-    background: #2a2a2a;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    border-left: 4px solid #00ffff;
+function desenharMatrix() {
+    // Fundo semitransparente para criar o rastro
+    ctx.fillStyle = "rgba(18, 18, 18, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#00ffff"; // Cor ciano para os números
+    ctx.font = tamanhoFonte + "px monospace";
+
+    for (let i = 0; i < gotas.length; i++) {
+        const texto = letras.charAt(Math.floor(Math.random() * letras.length));
+        ctx.fillText(texto, i * tamanhoFonte, gotas[i] * tamanhoFonte);
+
+        if (gotas[i] * tamanhoFonte > canvas.height && Math.random() > 0.975) {
+            gotas[i] = 0;
+        }
+        gotas[i]++;
+    }
 }
 
-.quadrados-container {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 10px;
-}
+// Atualiza a animação
+setInterval(desenharMatrix, 50);
 
-.quadrado {
-    width: 30px;
-    height: 30px;
-    border: 2px solid #444;
-    background-color: #1e1e1e;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.quadrado.check {
-    background-color: #00ffff;
-    box-shadow: 0 0 10px #00ffff;
-    border-color: #fff;
-}
-
-hr { border: 0.5px solid #333; margin: 30px 0; }
-
-.grid-semana {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.dia-box {
-    background: #2a2a2a;
-    border: 1px solid #00ffff;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 5px;
-}
-
-.dia-box span {
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.dia-box textarea {
-    width: 100%;
-    height: 60px;
-    background: transparent;
-    border: none;
-    color: #fff;
-    resize: none;
-    font-size: 0.9rem;
-    text-align: center;
-    outline: none;
-}
-
-.dia-box textarea:focus {
-    background: #333;
-}
-
-#status-porcentagem {
-    color: #39ff14 !important;
-    font-weight: bold;
-    text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
-}
-
-#barra-preenchimento {
-    background: #39ff14 !important;
-    box-shadow: 0 0 15px #39ff14;
-}
-
-h1 {
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
-    margin-bottom: 40px;
-}
-
-.dia-box {
-    background: rgba(30, 30, 30, 0.8); /* Fundo levemente transparente */
-    backdrop-filter: blur(5px); /* Efeito de vidro embaçado */
-    border: 1px solid #00ffff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    transition: transform 0.2s;
-}
-
-.dia-box:hover {
-    transform: translateY(-5px); /* Caixinha levanta ao passar o mouse */
-    border-color: #39ff14; /* Muda para verde neon no hover */
-}
-
-button {
-    background: transparent;
-    border: 2px solid #00ffff;
-    color: #00ffff;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    padding: 12px 20px;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
-    transition: all 0.3s;
-}
-
-button:hover {
-    background: #00ffff;
-    color: #121212;
-    box-shadow: 0 0 20px #00ffff;
-}
-
-#canvas-fundo {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -2; /* Fica atrás de tudo, inclusive da grade */
-    opacity: 0.15; /* Deixa bem sutil para não atrapalhar a leitura */
-    pointer-events: none;
-}
+// Ajusta o tamanho se você redimensionar a janela
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
